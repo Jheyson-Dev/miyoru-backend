@@ -5,11 +5,119 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  emailVerified Boolean   @default(false) @map("email_verified")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  emailVerifications EmailVerifications[]
+  passwordResets     PasswordResets[]
+  sessions           Sessions[]
+  userRoles          UserRoles[]
+
+  @@map("user")
+}
+
+model EmailVerifications {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  token      String
+  expiresAt  DateTime @map("expires_at")
+  verifiedAt Boolean  @default(false) @map("verified_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("email_verifications")
+}
+
+model PasswordResets {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String
+  expiresAt DateTime @map("expires_at")
+  usedAt    Boolean  @default(false) @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("password_resets")
+}
+
+model Sessions {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String
+  ipAddress String   @map("ip_address")
+  userAgent String   @map("user_agent")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model UserRoles {
+  id      String  @id @default(cuid())
+  userId  String  @map("user_id")
+  roleId  String  @map("role_id")
+  user    User    @relation(fields: [userId], references: [id])
+  roles   Roles?  @relation(fields: [rolesId], references: [id])
+  rolesId String?
+
+  @@unique([userId, roleId], name: "user_role_unique_idx")
+  @@map("user_roles")
+}
+
+model Roles {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  userRoles       UserRoles[]
+  rolePermissions RolePermissions[]
+
+  @@map("roles")
+}
+
+model RolePermissions {
+  id            String       @id @default(cuid())
+  roleId        String       @map("role_id")
+  permissionId  String       @map("permission_id")
+  assignedAt    DateTime     @default(now()) @map("assigned_at")
+  permissions   Permissions? @relation(fields: [permissionsId], references: [id])
+  permissionsId String?
+  roles         Roles?       @relation(fields: [rolesId], references: [id])
+  rolesId       String?
+
+  @@unique([roleId, permissionId], name: "role_permission_unique_idx")
+  @@map("role_permissions")
+}
+
+model Permissions {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  resource    String
+  action      String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rolePermissions RolePermissions[]
+
+  @@map("permissions")
 }
