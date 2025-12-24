@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ApiResponseDto<T> {
+export class ApiSuccessResponseDto<T> {
   @ApiProperty({ example: true })
   success: boolean;
 
@@ -10,7 +10,7 @@ export class ApiResponseDto<T> {
   @ApiProperty({ example: {}, nullable: true })
   data: T;
 
-  constructor(partial: Partial<ApiResponseDto<T>>) {
+  constructor(partial: Partial<ApiSuccessResponseDto<T>>) {
     Object.assign(this, partial);
   }
 }

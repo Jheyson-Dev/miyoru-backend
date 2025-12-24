@@ -7,6 +7,8 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { ApiSuccessResponseDto } from '../dto/api-succes-response.dto';
+import { ApiErrorResponseDto } from '../dto/api-error-response.dto';
 
 /**
  * Decorador compuesto para documentar respuestas comunes de Swagger en endpoints.
@@ -17,13 +19,27 @@ export function ApiCommonResponses(options?: { successDescription?: string }) {
     ApiResponse({
       status: 200,
       description: options?.successDescription || 'Operación exitosa.',
+      type: ApiSuccessResponseDto,
     }),
-    ApiBadRequestResponse({ description: 'Solicitud inválida.' }),
-    ApiUnauthorizedResponse({ description: 'No autorizado.' }),
-    ApiForbiddenResponse({ description: 'Prohibido.' }),
-    ApiNotFoundResponse({ description: 'No encontrado.' }),
+    ApiBadRequestResponse({
+      description: 'Solicitud inválida.',
+      type: ApiErrorResponseDto,
+    }),
+    ApiUnauthorizedResponse({
+      description: 'No autorizado.',
+      type: ApiErrorResponseDto,
+    }),
+    ApiForbiddenResponse({
+      description: 'Prohibido.',
+      type: ApiErrorResponseDto,
+    }),
+    ApiNotFoundResponse({
+      description: 'No encontrado.',
+      type: ApiErrorResponseDto,
+    }),
     ApiInternalServerErrorResponse({
       description: 'Error interno del servidor.',
+      type: ApiErrorResponseDto,
     }),
   );
 }
