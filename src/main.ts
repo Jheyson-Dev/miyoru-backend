@@ -23,6 +23,7 @@ async function bootstrap() {
     .setTitle('API Documentation')
     .setDescription('Documentación de la API de Miyoru')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
