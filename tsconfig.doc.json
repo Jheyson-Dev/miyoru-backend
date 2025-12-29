@@ -6,6 +6,7 @@
     "**/*.spec.ts",
     "src/generated/**",
     "e2e/**",
-    "src/test.ts"
+    "src/test.ts",
+    "**/dtos/**"
   ]
 }

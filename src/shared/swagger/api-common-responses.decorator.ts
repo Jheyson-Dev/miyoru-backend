@@ -7,8 +7,7 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { ApiSuccessResponseDto } from '../dto/api-succes-response.dto';
-import { ApiErrorResponseDto } from '../dto/api-error-response.dto';
+import { ApiErrorResponseDto, ApiSuccessResponseDto } from '../dtos';
 
 /**
  * Decorador compuesto para documentar respuestas comunes de Swagger en endpoints.
