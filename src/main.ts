@@ -10,6 +10,7 @@ import { PrismaExceptionFilter } from './shared/filters/prisma-exception.filter'
 import { ValidationExceptionFilter } from './shared/filters/validation-exception.filter';
 import { HttpExceptionFilter } from './shared/filters/http-exception-format.filter';
 import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
+import { ENVIROMENTS } from './config';
 
 /**
  * Inicializa la aplicación NestJS y configura los filtros globales, pipes y Swagger.
@@ -45,6 +46,6 @@ async function bootstrap() {
     new ValidationExceptionFilter(),
     new GlobalExceptionFilter(),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(ENVIROMENTS.PORT);
 }
 bootstrap();
