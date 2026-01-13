@@ -12,13 +12,13 @@ import bcrypt from 'bcryptjs';
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createUser(data: CreateUserDto) {
+  createUser(data: CreateUserDto) {
     return this.prismaService.user.create({
       data,
     });
   }
 
-  async getAllUsers() {
+  getAllUsers() {
     return this.prismaService.humanProfile.findMany();
   }
 
@@ -84,5 +84,14 @@ export class UsersService {
     }
 
     return profile;
+  }
+
+  async activateUser(userId: string) {
+    await this.getUserById(userId);
+
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data: { isActive: true },
+    });
   }
 }

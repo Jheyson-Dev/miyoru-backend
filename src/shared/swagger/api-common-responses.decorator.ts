@@ -20,6 +20,11 @@ export function ApiCommonResponses(options?: { successDescription?: string }) {
       description: options?.successDescription || 'Operación exitosa.',
       type: ApiSuccessResponseDto,
     }),
+    ApiResponse({
+      status: 201,
+      description: 'Recurso creado exitosamente.',
+      type: ApiSuccessResponseDto,
+    }),
     ApiBadRequestResponse({
       description: 'Solicitud inválida.',
       type: ApiErrorResponseDto,
