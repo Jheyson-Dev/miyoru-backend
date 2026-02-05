@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UsersController } from './controllers/users.controllers';
 import { UsersService } from './services/users.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 
 /**
  * UsersModule
@@ -10,7 +11,7 @@ import { PrismaModule } from '../prisma/prisma.module';
  * Incluye el controlador y el servicio para operaciones CRUD y autenticación de usuarios.
  */
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, forwardRef(() => AuthModule)],
   controllers: [UsersController],
   providers: [UsersService],
 })

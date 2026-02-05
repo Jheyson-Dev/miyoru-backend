@@ -9,15 +9,15 @@ import {
 import { UserType } from 'src/generated/prisma/enums';
 
 export class RegisterDto {
-  @ApiProperty({
-    enum: UserType,
-    description: 'Tipo de usuario',
-    example: UserType.HUMAN,
-    required: false, // Esto la hace opcional en Swagger
-  })
-  @IsEnum(UserType, { message: 'El tipo de usuario no es válido.' })
-  @IsOptional()
-  userType?: UserType;
+  // @ApiProperty({
+  //   enum: UserType,
+  //   description: 'Tipo de usuario',
+  //   example: UserType.HUMAN,
+  //   required: false, // Esto la hace opcional en Swagger
+  // })
+  // @IsEnum(UserType, { message: 'El tipo de usuario no es válido.' })
+  // @IsOptional()
+  // userType?: UserType;
 
   @ApiProperty({
     description: 'Nombre a mostrar del usuario',

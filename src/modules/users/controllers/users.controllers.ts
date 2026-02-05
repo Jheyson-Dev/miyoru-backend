@@ -20,7 +20,6 @@ import { UpdateHumanDto } from '../dtos/requests';
 @UseGuards(JwtAuthGuard)
 @ApiTags('USERS')
 @Controller('users')
-@ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -28,9 +27,7 @@ export class UsersController {
 
   @Get('/me')
   @ApiOperation({ summary: 'Obtener el usuario actual' })
-  @ApiCommonResponses({
-    successDescription: 'Usuario obtenido correctamente.',
-  })
+  @ApiCommonResponses()
   getMe() {
     // const user = await this.usersService.getUserById('some-user-id');
     // return new ApiResponseDto({

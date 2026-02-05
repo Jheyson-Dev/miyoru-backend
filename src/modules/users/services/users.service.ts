@@ -1,12 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { UserType } from 'src/generated/prisma/enums';
 import {
   CreateHumanDto,
   CreateUserDto,
   UpdateHumanDto,
   UpdateUserDto,
-} from '../dtos/requests';
+} from 'src/modules/users/dtos/requests';
+import { CreateUserWithProfile } from 'src/modules/users/intefaces/create-user-with-profile.interface';
 import bcrypt from 'bcryptjs';
+import { User } from 'src/generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +20,6 @@ export class UsersService {
       data,
     });
   }
-
   getAllUsers() {
     return this.prismaService.humanProfile.findMany();
   }
@@ -92,6 +94,61 @@ export class UsersService {
     return this.prismaService.user.update({
       where: { id: userId },
       data: { isActive: true },
+    });
+  }
+
+  async getHumanProfileById(userId: string) {
+    await this.getUserById(userId);
+
+    return await this.prismaService.humanProfile.findUniqueOrThrow({
+      where: { userId },
+      include: {
+        user: true,
+      },
+    });
+  }
+
+  // **************************************************************** //
+
+  /**
+   * Busca un usuario por email o username
+   * @param emailOrUsername - Email o username del usuario
+   * @returns Perfil del usuario con datos del user asociado, o null si no existe
+   */
+  async findUserByUsernameOrEmail(emailOrUsername: string) {
+    return this.prismaService.humanProfile.findFirst({
+      where: {
+        OR: [{ username: emailOrUsername }, { email: emailOrUsername }],
+      },
+      include: {
+        user: true,
+      },
+    });
+  }
+
+  /**
+   * Crea un usuario de tipo HUMAN con su perfil asociado en una transacción
+   * @param data - Datos del usuario y perfil a crear
+   * @returns Usuario creado con su perfil
+   */
+  async createUserWithHumanProfile(data: CreateUserWithProfile): Promise<User> {
+    const { displayName, ...human } = data;
+
+    // ========================================
+    // Crear usuario y perfil en transacción
+    // ========================================
+    // Prisma maneja automáticamente la transacción al usar create anidado
+    // Si falla la creación del perfil, también se revierte la creación del usuario
+    return this.prismaService.user.create({
+      data: {
+        userType: UserType.HUMAN,
+        displayName,
+        humanProfile: {
+          create: {
+            ...human, // username, fullName, email, passwordHash
+          },
+        },
+      },
     });
   }
 }

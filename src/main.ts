@@ -12,22 +12,42 @@ import { HttpExceptionFilter } from './shared/filters/http-exception-format.filt
 import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
 import { ENVIROMENTS } from './config';
 
+import cookieParser from 'cookie-parser';
+
 /**
  * Inicializa la aplicación NestJS y configura los filtros globales, pipes y Swagger.
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 2. Activar el middleware para leer cookies que llegan
+  app.use(cookieParser());
+
+  // 3. Configurar CORS (Crucial para Cookies)
+  app.enableCors({
+    // IMPORTANTE: Cuando usas cookies, NO puedes poner '*' aquí.
+    // Debes poner explícitamente la URL de tu frontend.
+    origin: ENVIROMENTS.FRONTEND_URL,
+
+    // IMPORTANTE: Esto permite el intercambio de cookies entre Front y Back
+    credentials: true,
+
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  });
+
+  const version = 'v1';
+  app.setGlobalPrefix(`api/${version}`);
+
   // Swagger setup
   const { SwaggerModule, DocumentBuilder } = await import('@nestjs/swagger');
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
     .setDescription('Documentación de la API de Miyoru')
-    .setVersion('1.0')
-    .addBearerAuth()
+    .setVersion(version)
+    // .addCookieAuth('accessToken')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup(`api/${version}/docs`, app, document);
 
   // ValidationPipe global
   const { ValidationPipe } = await import('@nestjs/common');
@@ -47,5 +67,11 @@ async function bootstrap() {
     new GlobalExceptionFilter(),
   );
   await app.listen(ENVIROMENTS.PORT);
+  console.log(
+    `Application is running on: ${await app.getUrl()}/api/${version}`,
+  );
+  console.log(
+    `Application docs is running on: ${await app.getUrl()}/api/${version}/docs `,
+  );
 }
 bootstrap();

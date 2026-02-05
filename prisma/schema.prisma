@@ -14,34 +14,101 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserType {
+  HUMAN
+  BOT
+  API
+}
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String    @map("password_hash")
-  emailVerified Boolean   @default(false) @map("email_verified")
-  isActive      Boolean   @default(true) @map("is_active")
-  lastLoginAt   DateTime? @map("last_login_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(cuid())
+  userType       UserType  @default(HUMAN) @map("user_type")
+  displayName    String    @map("display_name")
+  avatarUrl      String?   @map("avatar_url")
+  isActive       Boolean   @default(false) @map("is_active")
+  lastLoginAt    DateTime? @map("last_login_at")
+  lastActivityAt DateTime? @map("last_activity_at")
+  metadata       Json?
+  deletedAt      DateTime? @map("deleted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   emailVerifications EmailVerifications[]
   passwordResets     PasswordResets[]
   sessions           Sessions[]
   userRoles          UserRoles[]
+  humanProfile       HumanProfile?
+  serviceProfiles    ServiceProfiles?
 
-  @@map("user")
+  @@map("users")
+}
+
+model HumanProfile {
+  userId        String    @id @map("user_id")
+  username      String    @unique
+  fullName      String    @map("full_name")
+  bio           String?
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  passwordHash  String    @map("password_hash")
+  phone         String?
+  birthDate     DateTime? @map("birth_date")
+  preferences   Json?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("human_profiles")
+}
+
+enum ServiceType {
+  TELEGRAM
+  DISCORD
+  INTERNAL_API
+  WHATSAPP
+}
+
+model ServiceProfiles {
+  userId      String      @id @map("user_id")
+  serviceType ServiceType @map("service_type")
+  externalId  String      @map("external_id")
+  config      Json
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("service_profiles")
 }
 
 model EmailVerifications {
-  id         String   @id @default(cuid())
-  userId     String   @map("user_id")
-  token      String
-  expiresAt  DateTime @map("expires_at")
-  verifiedAt Boolean  @default(false) @map("verified_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-  user       User     @relation(fields: [userId], references: [id])
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  token      String    @unique
+  expiresAt  DateTime  @map("expires_at")
+  verified   Boolean   @default(false)
+  verifiedAt DateTime? @map("verified_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  user       User      @relation(fields: [userId], references: [id])
 
   @@map("email_verifications")
+}
+
+model RefreshTokens {
+  id         String    @id @default(cuid())
+  sessionId  String    @map("session_id")
+  jtiHash    String    @unique @map("jti_hash")
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  revoked    Boolean   @default(false)
+  revokedAt  DateTime? @map("revoked_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  deviceInfo String?   @map("device_info")
+  ipAddress  String?   @map("ip_address")
+  sessions   Sessions? @relation(fields: [sessionId], references: [id])
+
+  @@map("refresh_tokens")
 }
 
 model PasswordResets {
@@ -57,14 +124,21 @@ model PasswordResets {
 }
 
 model Sessions {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  token     String
-  ipAddress String   @map("ip_address")
-  userAgent String   @map("user_agent")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  user      User     @relation(fields: [userId], references: [id])
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id") // Reference to the User model
+  deviceInfo String    @map("device_info") // e.g., "iPhone 12, Chrome Browser"
+  ipAddress  String    @map("ip_address") // e.g.,  "192.168.1.1"
+  userAgent  String    @map("user_agent") // e.g., "Mozilla/5.0 ..."
+  createdAt  DateTime  @default(now()) @map("created_at") // Timestamp when the session was created
+  lastUsedAt DateTime  @default(now()) @map("last_used_at") // Timestamp of the last usage
+  expiresAt  DateTime  @map("expires_at") // When the session expires
+  revoked    Boolean   @default(false) // Indicates if the session has been revoked
+  revokedAt  DateTime? @map("revoked_at") // Timestamp when the session was revoked
+  location   String?   @map("location") // e.g., "New York, USA"
+  platform   String?   @map("platform") // e.g., "Windows", "iOS"
+  user       User      @relation(fields: [userId], references: [id])
+
+  refreshTokens RefreshTokens[]
 
   @@map("sessions")
 }

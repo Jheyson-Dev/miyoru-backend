@@ -51,6 +51,8 @@ export class EmailVerificationService {
 
     // Marcar el token como verificado
     await this.markEmailAsVerified(record.userId, now.toJSDate(), record.token);
+
+    return record.userId;
   }
 
   markHumanAsVerified(userId: string) {

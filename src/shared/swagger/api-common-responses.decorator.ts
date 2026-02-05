@@ -1,30 +1,19 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiResponse,
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { ApiErrorResponseDto, ApiSuccessResponseDto } from '../dtos';
+import { ApiErrorResponseDto } from '../dtos';
 
 /**
  * Decorador compuesto para documentar respuestas comunes de Swagger en endpoints.
  * Puedes extenderlo con más respuestas según tus necesidades.
  */
-export function ApiCommonResponses(options?: { successDescription?: string }) {
+export function ApiCommonResponses() {
   return applyDecorators(
-    ApiResponse({
-      status: 200,
-      description: options?.successDescription || 'Operación exitosa.',
-      type: ApiSuccessResponseDto,
-    }),
-    ApiResponse({
-      status: 201,
-      description: 'Recurso creado exitosamente.',
-      type: ApiSuccessResponseDto,
-    }),
     ApiBadRequestResponse({
       description: 'Solicitud inválida.',
       type: ApiErrorResponseDto,

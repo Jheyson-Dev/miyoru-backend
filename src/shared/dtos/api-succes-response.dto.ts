@@ -7,7 +7,7 @@ export class ApiSuccessResponseDto<T> {
   @ApiProperty({ example: 'Operación exitosa.' })
   message: string;
 
-  @ApiProperty({ example: {}, nullable: true })
+  @ApiProperty({ nullable: true })
   data: T;
 
   constructor(partial: Partial<ApiSuccessResponseDto<T>>) {
